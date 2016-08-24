@@ -174,7 +174,7 @@ void Consolidator::readUserSuppliedSnpWeights( std::string path ){
 void Consolidator::performConsolidation(ErrorCalculator& eCalculator, int gap,int min_snp,float min_cm,int extendSnp)
 {
 	//cout<<"in consolidator extendsnp"<<extendSnp<<endl;
-         int consolidations = 0, removed = 0;
+         unsigned long long consolidations = 0, removed = 0;
 for(int i=0;i<person_count;++i)//for each person
         {
                 for(int j=i;j<person_count;++j)//compare with each other person
@@ -265,7 +265,9 @@ void Consolidator::performTrim(ErrorCalculator& e_obj,int window,
 {
   int removed1 =0, removed2 = 0, removed3 = 0, removed4 = 0;
   int not_removed = 0;
-  int total_count = global_initial;
+  //int total_count = global_initial;
+  unsigned long long total_count=0;
+
   bool wrongOption = false;
   float per_err_threshold1;
   if(empirical_pie_threshold >= 0.0){

@@ -94,6 +94,6 @@ class Consolidator
 	std::string ibg_str;
 	std::string final_sh_str;
 	std::string ma_thresh_str;
-	int global_initial;
+	unsigned long long  global_initial;
 };
 #endif // ndef CONSOLIDATOR_H
