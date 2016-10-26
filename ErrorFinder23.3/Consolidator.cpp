@@ -1,4 +1,4 @@
-#include "Consolidator.hpp"
+//#include "Consolidator.hpp"
 //#include "ErrorCalculator.cpp"
 #include <fstream>
 #include <stdlib.h>
@@ -11,22 +11,23 @@
 #include <sstream>
 #include <iomanip>
 #include <cfloat>
+#include "Consolidator.hpp"
+#include "ErrorCalculator.hpp"
 
-
-using namespace std;
+//using namespace std;
 
 template <typename T>
-  string NumberToString ( T Number )
-  {
-     ostringstream ss;
-     ss << Number;
-     return ss.str();
-  }
+std::string NumberToString ( T Number )
+{
+	std::ostringstream ss;
+	ss << Number;
+	return ss.str();
+}
 
-bool Consolidator::compareFunction(SNP s1, SNP s2)
+bool Consolidator::compareFunction(SNP_lrf s1, SNP_lrf s2)
 {
 
-        return (s1.start<s2.start);
+	return (s1.start<s2.start);
 
 }
 
@@ -44,7 +45,7 @@ void Consolidator::sortMatches()
         }
 }
 
-void Consolidator::readMatches(string path,int pers_count, ErrorCalculator& eCalculator, int trueSNP, float trueCM, int snipExtend,string pedFile )//path->BMATCHFILE file
+void Consolidator::readMatches(std::string path,int pers_count, ErrorCalculator& eCalculator, int trueSNP, float trueCM, int snipExtend,std::string pedFile )//path->BMATCHFILE file
 {
 
 
@@ -67,19 +68,20 @@ void Consolidator::readMatches(string path,int pers_count, ErrorCalculator& eCal
         unsigned int pid[2];
         unsigned int sid[2];
         unsigned int dif,hom[2];
-        ifstream file_bmatch(path.c_str(),ios::binary);
+        std::ifstream file_bmatch(path.c_str(),std::ios::binary);
         if( !file_bmatch )
          {
-             cerr<<"unable to open the bmatch file, exiting the program" << endl;
-             cout<<"we found the bmatch file"<<endl;
+        	std::cerr<<"unable to open the bmatch file, exiting the program" << std::endl;
+        	std::cout<<"we found the bmatch file"<<std::endl;
              exit( -1 );
 
          }
 
 
-//int counttt=0;
+//unsigned long long counttt=0;
         while ( !file_bmatch.eof())
         {
+        	//counttt++;
 
         		pid[0] = -1;
                 file_bmatch.read( (char*) &pid[0] , sizeof( unsigned int ) );
@@ -92,29 +94,31 @@ void Consolidator::readMatches(string path,int pers_count, ErrorCalculator& eCal
                 file_bmatch.read( (char*) &hom[1] , sizeof( bool ) );
                  if(pid[0]>=pers_count||pid[1]>=pers_count)
                  {
-                      cerr<<"problem with bsid file, check it please"<<endl;
+                	 std::cerr<<"problem with bsid file, check it please"<<std::endl;
                       return;
 
                  }
-                 SNP snp;
+                 SNP_lrf snp;
 
 
                  snp.start=sid[0];
                  snp.end=sid[1];
 
-                 /*cout<<"counttt= "<<counttt;
-                 counttt++;
-                 cout<<" pid[0]= "<<pid[0];
-                 cout<<"\tpid[1]= "<<pid[1];
-                 cout<<"\tsid[0]= "<<sid[0];
-                 cout<<"\tsid[1]= "<<sid[1];
-                 cout<<"\tdif= "<<dif;
-                 cout<<"\thom[0]="<<hom[0];
-                 cout<<"\thom[1]= "<<hom[1];
-                 cout<<"snp.start = "<<sid[0];
-                 cout<<"\tsnp.end=" <<sid[1];
+//
+/*
 
-                 cout<<endl;*/
+                 std::cout<<" pid[0]= "<<pid[0];
+                 std::cout<<"\tpid[1]= "<<pid[1];
+                 std::cout<<"\tsid[0]= "<<sid[0];
+                 std::cout<<"\tsid[1]= "<<sid[1];
+                 std::cout<<"\tdif= "<<dif;
+                 std::cout<<"\thom[0]="<<hom[0];
+                 std::cout<<"\thom[1]= "<<hom[1];
+                 std::cout<<"\tsnp.start = "<<sid[0];
+                 std::cout<<"\tsnp.end=" <<sid[1];
+                 std::cout<<std::endl;
+//
+*/
 
 
                  if(pid[0]<=pid[1])
@@ -133,11 +137,12 @@ void Consolidator::readMatches(string path,int pers_count, ErrorCalculator& eCal
                  }	
 
         }
+   // std::cout<<m_matches.size()<<std::endl;
         file_bmatch.close();
     }
-    catch(exception &e)
+    catch(std::exception &e)
     {
-       cerr<<"Error:"<<e.what()<<endl;
+    	std::cerr<<"Error:"<<e.what()<<std::endl;
        exit( -1 );
     }
         
@@ -145,14 +150,14 @@ void Consolidator::readMatches(string path,int pers_count, ErrorCalculator& eCal
 //for reading in a file of user supplied snp weights
 void Consolidator::readUserSuppliedSnpWeights( std::string path ){
   float temp;
-  stringstream ss;
-  string item,line;
+  std::stringstream ss;
+  std::string item,line;
   try
   {
-    ifstream file_weights(path.c_str());
+	  std::ifstream file_weights(path.c_str());
     if( !file_weights )
     {
-      cerr<< "Weight file cannot be opened, check the path or the file type. Exiting program." <<endl; 
+    	std::cerr<< "Weight file cannot be opened, check the path or the file type. Exiting program." <<std::endl;
       exit( -1 );
     }
     while ( getline(file_weights , line) )
@@ -164,9 +169,9 @@ void Consolidator::readUserSuppliedSnpWeights( std::string path ){
     }
     file_weights.close();
   }
-  catch(exception &e)
+  catch(std::exception &e)
   {
-    cerr<<e.what()<<endl;
+	  std::cerr<<e.what()<<std::endl;
     exit( -1 );
   }
 }
@@ -174,7 +179,7 @@ void Consolidator::readUserSuppliedSnpWeights( std::string path ){
 void Consolidator::performConsolidation(ErrorCalculator& eCalculator, int gap,int min_snp,float min_cm,int extendSnp)
 {
 	//cout<<"in consolidator extendsnp"<<extendSnp<<endl;
-         unsigned long long consolidations = 0, removed = 0;
+         int consolidations = 0, removed = 0;
 for(int i=0;i<person_count;++i)//for each person
         {
                 for(int j=i;j<person_count;++j)//compare with each other person
@@ -182,43 +187,9 @@ for(int i=0;i<person_count;++i)//for each person
                         int temp1=-1,temp2=-1;
                          for(int l=0;l<m_matches[i][j].size();++l)//for each match
                          {
-
-
-
-
                                temp1= m_matches[i][j][l].start;//cout<<"temp1 before = "<<temp1<<endl;
+                               temp2= m_matches[i][j][l].end;//cout<<"temp2 before = "<<temp2<<endl;
 
-                                temp2= m_matches[i][j][l].end;//cout<<"temp2 before = "<<temp2<<endl;
-
-/*
-                                if(temp1-extendSnp <0)
-                                {
-                                	temp1=0;
-                                	//cout<<"New value of temp1= "<<temp1<<endl;
-                                }
-                                else
-                                {
-                                	temp1=m_matches[i][j][l].start-extendSnp;
-                                	//cout<<"New value of temp1= "<<temp1<<endl;
-                                }
-
-                                if(temp2+extendSnp > 4443)// change this constant
-                                {
-                                	temp2=m_matches[i][j][l].end;
-                                	//cout<<"New value of temp2= "<<temp2<<endl;
-                                }
-                                else
-                                {
-                                	temp2=m_matches[i][j][l].end+extendSnp;
-                                	//cout<<"New value of temp2= "<<temp2<<endl;
-                                }
-*/
-//till here
-//cout<<"perform consolidation temp1= "<<temp1<<endl;
-//cout<<"perform consolidation temp2= "<<temp2<<endl;
-
-
-        
                                 if(temp2==-1||temp1==-1){continue;}
 
                                 for(int k=l+1;k<m_matches[i][j].size();++k) //for each other match
@@ -260,14 +231,12 @@ global_initial = removed;
 void Consolidator::performTrim(ErrorCalculator& e_obj,int window,
                                int ma_snp_ends, float ma_threshold,
                                int min_snp,float min_cm,
-                               float per_err_threshold, string option,
+                               float per_err_threshold, std::string option,
                                float hThreshold, bool holdOut,float empirical_threshold, float empirical_pie_threshold,int extendSnp)//<piyush> added the param int EXTENDSNP for calculating moving window avg)
 {
   int removed1 =0, removed2 = 0, removed3 = 0, removed4 = 0;
   int not_removed = 0;
-  //int total_count = global_initial;
-  unsigned long long total_count=0;
-
+  int total_count = global_initial;
   bool wrongOption = false;
   float per_err_threshold1;
   if(empirical_pie_threshold >= 0.0){
@@ -276,7 +245,7 @@ void Consolidator::performTrim(ErrorCalculator& e_obj,int window,
     per_err_threshold1 = getPctErrThreshold( per_err_threshold );
   }
   std::stringstream sstr;
-  sstr << fixed << setprecision(10) << per_err_threshold1;
+  sstr << std::fixed << std::setprecision(10) << per_err_threshold1;
   std::string per_err_value = sstr.str();
   emp_pie_thresh_str = "empirical pie threshold is : " + per_err_value  + " \n";
   float hThreshold1 = 0;
@@ -309,7 +278,7 @@ void Consolidator::performTrim(ErrorCalculator& e_obj,int window,
 
 if (extendSnp != 0)
 {
-   
+
         /*<piyush1>*/
         if(temp1-extendSnp <0)
                                      {
@@ -358,20 +327,20 @@ if (extendSnp != 0)
           }
         }
 
-        vector<vector<int> > errors=e_obj.checkErrors(pers1, pers2, temp1, temp2);
-        vector<int>finalErrors=e_obj.getFinalErrors(errors);//<piyush for errors>
+        std::vector<std::vector<int> > errors=e_obj.checkErrors(pers1, pers2, temp1, temp2);
+        std::vector<int>finalErrors=e_obj.getFinalErrors(errors);//<piyush for errors>
 
         //cout<<"finalErrors size= "<<finalErrors.size()<<endl;
         /*Inject implied error at start/end of SH here*/
-        vector<int>::iterator it;
+        std::vector<int>::iterator it;
         it = finalErrors.begin(); //go to the start of the vector
         if(finalErrors[0] != 1){
           finalErrors.insert(it,1); //inject an error at position 1, if not already there
         }	
         /*End inject implied error section*/
 
-        vector<int>trimPositions;
-        vector<float>movingAverages;
+        std::vector<int>trimPositions;
+        std::vector<float>movingAverages;
         float threshold;
         if( (e_obj.isInitialCmDrop(temp1,temp2,min_cm)) || ((temp2-temp1) < min_snp) ){ //initial drop. Don't calculate MA
           trimPositions.push_back(temp1);
@@ -689,8 +658,8 @@ if (extendSnp != 0)
   //begin new test code section here: Dec 4th 2014
   int genome_length = e_obj.getGenomeBPLength();    
   float adjusted_genome_length = genome_length / 1000.0; //L using kbp for now
-  int genome_min = e_obj.getMinimumBP(); cout<<"genome_min= "<<genome_min<<endl;
-  int genome_max = e_obj.getMaximumBP(); cout<<"genome_max= "<<genome_max<<endl;
+  int genome_min = e_obj.getMinimumBP(); std::cout<<"genome_min= "<<genome_min<<std::endl;
+  int genome_max = e_obj.getMaximumBP(); std::cout<<"genome_max= "<<genome_max<<std::endl;
   int genome_size_snps = (find_genome_max() - find_genome_min())+1; //used for genome_vector
   float wprime_numerator = 0.0;  //This is Ci / L
   float total_sh_length_sum = 0.0;
@@ -827,15 +796,15 @@ void Consolidator::findTrueSimplePctErrors( ErrorCalculator &e_obj, float PIElen
                   continue;
               }
     //-------------------------------------------------------------------------------------------------
-    int t1 = m_trueMatches[ i ][ j ][ l ].start +
-                          ( m_trueMatches[ i ][ j ][ l ].end -
-                            m_trueMatches[ i ][ j ][ l ].start ) * 0.25;
-             int t2 = m_trueMatches[ i ][ j ][ l ].end -
-                           ( m_trueMatches[ i ][ j ][ l ].end -
-                            m_trueMatches[ i ][ j ][ l ].start ) * 0.25;
+	int t1 = m_trueMatches[ i ][ j ][ l ].start +
+						  ( m_trueMatches[ i ][ j ][ l ].end -
+							m_trueMatches[ i ][ j ][ l ].start ) * 0.25;
+	int t2 = m_trueMatches[ i ][ j ][ l ].end -
+			   ( m_trueMatches[ i ][ j ][ l ].end -
+				m_trueMatches[ i ][ j ][ l ].start ) * 0.25;
 
-    vector<vector<int> > trueErrors=e_obj.checkErrors( i, j, t1, t2);
-             vector<int>finalTrueErrors=e_obj.getFinalErrors( trueErrors );
+	std::vector<std::vector<int> > trueErrors=e_obj.checkErrors( i, j, t1, t2);
+	std::vector<int>finalTrueErrors=e_obj.getFinalErrors( trueErrors );
     //This section handles finding the maximum moving averages amongst trulyIBD segments
     std::vector<float> av;
     float current_max;
@@ -867,11 +836,11 @@ void Consolidator::findTrueSimplePctErrors( ErrorCalculator &e_obj, float PIElen
                   --temp2;
                 }
              }
-              vector<vector<int> > errors=e_obj.checkErrors( i, j, temp1, temp2);
+             std::vector<std::vector<int> > errors=e_obj.checkErrors( i, j, temp1, temp2);
 
-                  vector<int>finalErrors=e_obj.getFinalErrors( errors );
+             std::vector<int>finalErrors=e_obj.getFinalErrors( errors );
 //                  float per_err = e_obj.getThreshold(finalErrors,temp1, temp2, 0 );
- float per_err = e_obj.getThreshold(finalErrors,temp1,temp2); //overload!
+             float per_err = e_obj.getThreshold(finalErrors,temp1,temp2); //overload!
                   m_errors.push_back( per_err );
                  if( holdOut  )
                  {
@@ -887,7 +856,7 @@ void Consolidator::findTrueSimplePctErrors( ErrorCalculator &e_obj, float PIElen
   }
    
    //this section actually handles the sorting of the max averages, and the setting of the user supplied percentile.
-   vector<float>maxes;
+   std::vector<float>maxes;
    float cutoff = empirical_ma_threshold; //assume the user wanted to supply a value. This value will be overwritten shortly if they did not.
    if(empirical_ma_threshold < 0.0){
    maxes = e_obj.getMaxAverages();
@@ -950,8 +919,8 @@ void Consolidator::findTruePctErrors( ErrorCalculator &e_obj,int ma_snp_ends, bo
      //then store that in a vector, sort them, and find the xth percentile of that vector. That will be
      //the ma that we use later
      //for that "finalErrors" parameters, need to get the number of errors along the truly IBD SH first...
-     vector<vector<int> > trueErrors=e_obj.checkErrors( i, j, t1, t2);
-              vector<int>finalTrueErrors=e_obj.getFinalErrors( trueErrors );
+              std::vector<std::vector<int> > trueErrors=e_obj.checkErrors( i, j, t1, t2);
+              std::vector<int>finalTrueErrors=e_obj.getFinalErrors( trueErrors );
 
      //handles MA calculations
      std::vector<float> av;
@@ -1010,9 +979,9 @@ void Consolidator::findTruePctErrors( ErrorCalculator &e_obj,int ma_snp_ends, bo
                   //temp1 = temp1;//Why?
                   temp2 = temp1 + len;
  //end crazy MOL stuff
-                  vector<vector<int> > errors=e_obj.checkErrors( i, j, temp1, temp2);
+                  std::vector<std::vector<int> > errors=e_obj.checkErrors( i, j, temp1, temp2);
 
-                  vector<int>finalErrors=e_obj.getFinalErrors( errors );
+                  std::vector<int>finalErrors=e_obj.getFinalErrors( errors );
 //                  float per_err = e_obj.getThreshold(finalErrors,temp1,temp2,ma_snp_ends );
  float per_err = e_obj.getThreshold(finalErrors,temp1,temp2);//overload
                   m_errors.push_back( per_err );
@@ -1024,7 +993,7 @@ void Consolidator::findTruePctErrors( ErrorCalculator &e_obj,int ma_snp_ends, bo
           }
        }  
    }
-   vector<float>maxes;
+   std::vector<float>maxes;
    float cutoff = empirical_ma_threshold;
    if(empirical_ma_threshold < 0.0){
    maxes = e_obj.getMaxAverages();
@@ -1044,12 +1013,14 @@ void Consolidator::findTruePctErrors( ErrorCalculator &e_obj,int ma_snp_ends, bo
         e_obj.log( str );
 
 }
+
+
 float Consolidator::getHoldOutThreshold( float threshold )
 {
  int pos = ( m_holdOutErrors.size() ) * threshold;
  if( pos >= m_holdOutErrors.size() || pos < 0 )
  {
-    cerr<< "wrong threshold value. it should be between 0-99.99";
+	 std::cerr<< "wrong threshold value. it should be between 0-99.99";
     exit( -1 );
  }
  return m_holdOutErrors[ pos ];  
@@ -1059,8 +1030,8 @@ float Consolidator::getPctErrThreshold( float threshold)
    int pos = ( m_errors.size()  ) * threshold;
  if( pos >= m_errors.size() || pos < 0 )
  {
-    cerr<< "wrong threshold value. it should be between 0-99.99"
-        << "errors list size is " << m_errors.size()<<endl ;
+	 std::cerr<< "wrong threshold value. it should be between 0-99.99"
+        << "errors list size is " << m_errors.size()<<std::endl ;
     exit( -1 );
  }
  return m_errors[ pos ];
@@ -1077,16 +1048,16 @@ void Consolidator::update_genome(int snp1,int snp2){
 
 void Consolidator::update_genome(int snp, float weight){
   if( (snp < 0) || (snp > genome_vector.size()) ){
-    cerr << "Error in updating genome. SNP: " << snp << " is outside of genome length." << endl;
+	  std::cerr << "Error in updating genome. SNP: " << snp << " is outside of genome length." << std::endl;
     exit(-1);
   }
   genome_vector[snp] = weight;
 }
 
 void Consolidator::print_genome(){
-  cout << "Printing Geneome..." << endl;
+	std::cout << "Printing Geneome..." << std::endl;
   for(int i = 0; i < genome_vector.size(); i++){
-    cout << genome_vector[i] << ", ";
+	  std::cout << genome_vector[i] << ", ";
   }
 }
 float Consolidator::update_snp_weight(int snp1,int snp2){
@@ -1144,4 +1115,3 @@ float Consolidator::get_snps_over_range(int snp1, int snp2, float weight){
   }
   return sum;
 }
-

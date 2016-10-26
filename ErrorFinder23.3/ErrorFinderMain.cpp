@@ -1,9 +1,11 @@
-#include "ErrorFinderManager.cpp"
+//#include "ErrorFinderManager.cpp"
 #include <iostream>
 #include <string>
 #include<cstring>
 #include <vector>
-using namespace std;
+#include "ErrorFinderManager.hpp"
+
+//using namespace std;
 
 int main(int argc,char *argv[])
 {

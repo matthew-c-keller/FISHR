@@ -6,9 +6,16 @@
 #include <sstream>
 #include<string>
 #include<vector>
-
+#include <iostream>
+/*
 class SNPs;
-class Marker;
+class Marker;*/
+class SNPs_lrf
+{
+       public:
+       bool SNP1,SNP2;
+
+};
 class Marker
 {
     public:
@@ -149,8 +156,8 @@ class ErrorCalculator
      int getGenomeBPLength(){return (marker_id[marker_id.size()-1].bp_distance - marker_id[0].bp_distance);}
          private:
          int pers_count;
-         std::vector<std::vector<SNPs > >ped_file;
-         std::vector<std::vector<SNPs > >hped_file;
+         std::vector<std::vector<SNPs_lrf > >ped_file;
+         std::vector<std::vector<SNPs_lrf > >hped_file;
 	 std::vector< int > mapper;
          std::vector<Marker>marker_id;
 	 std::vector<Marker>hMarker_id;
@@ -160,11 +167,255 @@ class ErrorCalculator
          bool countGapError;
 	 float cutoff;
 };    
+template < class T > void ErrorCalculator::errorOutput(int pers1, int pers2, int snp1, int snp2, int min_snp, float min_cm, std::vector< T > positions,std::vector< int > errors, float pct_err, int startTrim,int endTrim, int start, int end, int reason)
+{
+	if( (snp1 == -1) || (snp2 == -1) ) return;
+	if(sample_id.size()<=pers1*2||sample_id.size()<=pers2*2)
+        {
+		std::cerr<<"something went wrong with bsid file while outputing"<<std::endl;
+               return;
+        }
+	std::cout << sample_id[(pers1*2)+1] << "\t" << sample_id[(pers2*2)+1] << "\t" << marker_id[snp1].bp_distance << "\t" << marker_id[snp2].bp_distance << "\t"
+             << (snp2-snp1) << "\t" << (marker_id[snp2].cm_distance-marker_id[snp1].cm_distance) << "\t" << pct_err << "\t" << start << "/" << end << "\t" << startTrim <<"/" << endTrim << "\t" << reason
+	     << "\t" << "/";
+	for(int i=0;i<errors.size();++i)
+        {
+		std::cout << errors[i] << "/";
+        }
+	std::cout << "\t";
+        for(int i=0;i<positions.size();++i)
+        {
+        	std::cout << positions[i] << "/";
+        }
+        std::cout << std::endl;
+}
+//-----------------------------------------
+//==================================================
+template < class T >
+void ErrorCalculator::middleHoldOutPut( int pers1,
+                                    int pers2, int snp1, int snp2,
+                                    int min_snp, float min_cm,
+                                    std::vector< T > positions, std::vector< int > trims,
+                                    float pct_err, int numberofOppHoms,
+                                    int length )
+{
+        if(snp1==-1) return;
+        if(snp2==-1)
+        {
+           return;
+        }
+        if((marker_id[snp2].cm_distance - marker_id[snp1].cm_distance)<min_cm || (snp2-snp1) < min_snp )
+        {
+             return;
+        }
 
-class SNPs
+        if(sample_id.size()<=pers1*2||sample_id.size()<=pers2*2)
+        {
+        	std::cerr<<"some thing went wrong with bsid file while outputing"<<std::endl;
+               return;
+        }
+
+        std::cout<<sample_id[(pers1*2)+1]<<"\t"
+             <<sample_id[(pers2*2)+1]<<"\t"
+                <<marker_id[snp1].bp_distance<<"\t"
+             <<marker_id[snp2].bp_distance<<"\t"
+               <<(snp2-snp1)<<"\t"
+               <<(marker_id[snp2].cm_distance-marker_id[snp1].cm_distance)<<"\t"<<"/";
+        for(int i=0;i<trims.size();++i)
+        {
+        	std::cout<<trims[i]<<"/";
+        }
+        std::cout<<"\t";
+        for(int i=0;i<positions.size();++i)
+        {
+        	std::cout<<positions[i]<<"/";
+        }
+        std::cout<<"\t"<< pct_err << "\t"<< numberofOppHoms << "\t" << length <<std::endl;
+
+}
+
+
+template <class T>
+void ErrorCalculator::fullPlusDroppedOutput( int pers1,int pers2,int snp1,int snp2,int min_snp, float min_cm, std::vector<T> positions,float pct_err,int reason ){
+        if(sample_id.size()<=pers1*2||sample_id.size()<=pers2*2)
+        {
+        	std::cerr<<"some thing went wrong with bsid file while outputing"<<std::endl;
+               return;
+        }
+
+        std::cout<<sample_id[(pers1*2)+1]<<"\t"
+             <<sample_id[(pers2*2)+1]<<"\t"
+    <<marker_id[snp1].bp_distance<<"\t"
+             <<marker_id[snp2].bp_distance<<"\t"
+               <<(snp2-snp1)<<"\t"
+               <<(marker_id[snp2].cm_distance-marker_id[snp1].cm_distance)<<"\t"<<"/";
+        for(int i=0;i<positions.size();++i)
+        {
+        	std::cout<<positions[i]<<"/";
+        }
+        std::cout<<"\t"<< pct_err;
+        std::cout << "\t"<< reason << std::endl;
+}
+//new error1 output
+template <class T>
+void ErrorCalculator::middleOutPut(int pers1, int pers2, int snp1, int snp2, int min_snp, float min_cm, std::vector<T> positions, float pct_err, int start, int end){
+	if( (snp1==-1) || (snp2==-1) ) return;
+	if( (sample_id.size() <= (pers1*2)) || (sample_id.size() <= (pers2*2)) ){
+		std::cerr << "Something went wrong with the bsid file while outputting data." << std::endl;
+		return;
+	}
+	std::cout << sample_id[(pers1*2)+1] << "\t" << sample_id[(pers2*2)+1] << "\t" << marker_id[snp1].bp_distance << "\t" << marker_id[snp2].bp_distance << "\t"
+	     << start << "/" << end << "\t" << (snp2-snp1) << "\t" << (marker_id[snp2].cm_distance - marker_id[snp1].cm_distance) << "\t" << "/";
+	for(int i = 0; i < positions.size(); i++){
+		std::cout << positions[i] << "/";
+	}
+	std::cout << "\t" << pct_err << std::endl;
+}
+//error1 output
+template <class T>
+void ErrorCalculator::middleOutPut( int pers1,int pers2,int snp1,int snp2, int min_snp, float min_cm,std::vector<T> positions, float pct_err )
+{
+        if(snp1==-1) return;
+        if(snp2==-1)
+        {
+           return;
+        }
+
+        if(sample_id.size()<=pers1*2||sample_id.size()<=pers2*2)
+        {
+        	std::cerr<<"some thing went wrong with bsid file while outputing"<<std::endl;
+               return;
+        }
+
+        std::cout<<sample_id[(pers1*2)+1]<<"\t"
+             <<sample_id[(pers2*2)+1]<<"\t"
+		<<marker_id[snp1].bp_distance<<"\t"
+             <<marker_id[snp2].bp_distance<<"\t"
+               <<(snp2-snp1)<<"\t"
+               <<(marker_id[snp2].cm_distance-marker_id[snp1].cm_distance)<<"\t"<<"/";
+        for(int i=0;i<positions.size();++i)
+        {
+        	std::cout<<positions[i]<<"/";
+        }
+        std::cout<<"\t"<< pct_err <<std::endl;
+
+}
+template < class T >
+void ErrorCalculator::middleOutPut( int pers1,int pers2,int snp1,int snp2,int min_snp, float min_cm, std::vector<T> positions,float pct_err,std::string reason){
+        if(snp1==-1) return;
+        if(snp2==-1)
+        {
+           return;
+        }
+        if((marker_id[snp2].cm_distance - marker_id[snp1].cm_distance)<min_cm || (snp2-snp1) < min_snp )
+        {
+             return;
+        }
+
+        if(sample_id.size()<=pers1*2||sample_id.size()<=pers2*2)
+        {
+        	std::cerr<<"some thing went wrong with bsid file while outputing"<<std::endl;
+               return;
+        }
+
+        std::cout<<sample_id[(pers1*2)+1]<<"\t"
+             <<sample_id[(pers2*2)+1]<<"\t"
+    <<marker_id[snp1].bp_distance<<"\t"
+             <<marker_id[snp2].bp_distance<<"\t"
+               <<(snp2-snp1)<<"\t"
+               <<(marker_id[snp2].cm_distance-marker_id[snp1].cm_distance)<<"\t"<<"/";
+        for(int i=0;i<positions.size();++i)
+        {
+        	std::cout<<positions[i]<<"/";
+        }
+        std::cout<<"\t"<< pct_err;
+        std::cout << "\t"<< reason << std::endl;
+}
+
+
+template < class T >
+void ErrorCalculator::middleOutPut( int pers1,int pers2,
+                                  int snp1,int snp2, int min_snp,
+                                  float min_cm,std::vector< T > positions,
+                                  std::vector< int > trims, float pct_err )
+{
+        if(snp1==-1) return;
+        if(snp2==-1)
+        {
+           return;
+        }
+        if((marker_id[snp2].cm_distance - marker_id[snp1].cm_distance)<min_cm || (snp2-snp1) < min_snp )
+        {
+        	std::cout << "Testing a theory. " << std::endl;
+             return;
+        }
+
+        if(sample_id.size()<=pers1*2||sample_id.size()<=pers2*2)
+        {
+        	std::cerr<<"some thing went wrong with bsid file while outputing"<<std::endl;
+               return;
+        }
+
+        std::cout<<sample_id[(pers1*2)+1]<<"\t"
+             <<sample_id[(pers2*2)+1]<<"\t"
+                <<marker_id[snp1].bp_distance<<"\t"
+             <<marker_id[snp2].bp_distance<<"\t"
+               <<(snp2-snp1)<<"\t"
+               <<(marker_id[snp2].cm_distance-marker_id[snp1].cm_distance)<<"\t"<<"/";
+        for(int i=0;i<trims.size();++i)
+        {
+        	std::cout<<trims[i]<<"/";
+        }
+        std::cout<<"\t";
+        for(int i=0;i<positions.size();++i)
+        {
+        	std::cout<<positions[i]<<"/";
+        }
+        std::cout<<"\t"<< pct_err <<std::endl;
+
+}
+//this one is for ma1, the one above is I think for ma2
+template < class T >
+void ErrorCalculator::middleOutPut( int pers1,int pers2,
+                                  int snp1,int snp2, int min_snp,
+                                  float min_cm,std::vector< T > positions,
+                                  std::vector< int > trims, float pct_err,int start,int end )
+{
+        if(snp1==-1) return;
+        if(snp2==-1)
+        {
+           return;
+        }
+        if(sample_id.size()<=pers1*2||sample_id.size()<=pers2*2)
+        {
+        	std::cerr<<"some thing went wrong with bsid file while outputing"<<std::endl;
+               return;
+        }
+
+        std::cout<<sample_id[(pers1*2)+1]<<"\t"
+             <<sample_id[(pers2*2)+1]<<"\t"
+                <<marker_id[snp1].bp_distance<<"\t"
+             <<marker_id[snp2].bp_distance<<"\t"
+               <<(snp2-snp1)<<"\t"
+               <<(marker_id[snp2].cm_distance-marker_id[snp1].cm_distance)<<"\t"
+	       << pct_err << "\t" << start <<"/" << end << "/";
+        for(int i=0;i<trims.size();++i)
+        {
+        	std::cout<<trims[i]<<"/";
+        }
+        std::cout<<"\t";
+        for(int i=0;i<positions.size();++i)
+        {
+        	std::cout<<positions[i]<<"/";
+        }
+
+}
+
+
+/*class SNPs
 {
        public:
        bool SNP1,SNP2;
 
-};
+};*/
 #endif // ndef ERRORCALCULATOR_H

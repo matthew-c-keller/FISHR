@@ -1,4 +1,4 @@
-#include "ErrorCalculator.hpp"
+//#include "ErrorCalculator.hpp"
 #include <algorithm>
 #include <iostream>
 #include <stdlib.h>
@@ -8,33 +8,35 @@
 #include <fstream>
 #include <time.h>
 #include <assert.h>
-using namespace std;
+#include "ErrorCalculator.hpp"
+#include "ErrorFinderManager.hpp"
+#include "Consolidator.hpp"
+
+//using namespace std;
 void ErrorCalculator::createLogFile( std::string path )
 {
      path  = path + std::string( ".log" );
      m_logger.open( path.c_str(), std::ofstream::out );
      if( !m_logger )
      {
-        cerr<<"unable to create log file, default out file is FISH.log"<< endl;
-        m_logger.open( "FISH.log", std::ofstream::out  ); 
+    	 std::cerr<<"unable to create log file, default out file is FISH.log"<< std::endl;
+        m_logger.open( "FISH.log", std::ofstream::out  );
      }
 }
 void ErrorCalculator::log( std::string& str )
 {
-    m_logger<< str<<endl;
+    m_logger<< str<<std::endl;
 }
-void ErrorCalculator::readBmidFile(string path)
+void ErrorCalculator::readBmidFile(std::string path)
 {
-
-
-     stringstream ss;
-     string item,line;
+	std::stringstream ss;
+	std::string item,line;
      try
      {
-       ifstream file_bmid(path.c_str());
+    	 std::ifstream file_bmid(path.c_str());
        if( !file_bmid )
        {
-            cerr<< "bmid file cannot be oppened. exiting program" <<endl; 
+    	   std::cerr<< "bmid file cannot be oppened. exiting program" <<std::endl;
             exit( -1 );
        }
        Marker cur_marker;
@@ -48,24 +50,24 @@ void ErrorCalculator::readBmidFile(string path)
        }
       file_bmid.close();
      }
-     catch(exception &e)
+     catch(std::exception &e)
      {
-      cerr<<e.what()<<endl;
+    	 std::cerr<<e.what()<<std::endl;
       exit( -1 );
      }
 
 }
-void ErrorCalculator::changeMapFile( string path )
+void ErrorCalculator::changeMapFile( std::string path )
 {
      mapper.resize( marker_id.size() );
-     stringstream ss;
-     string item,line;
+     std::stringstream ss;
+     std::string item,line;
      try
      {
-       ifstream file_bmid(path.c_str());
+    	 std::ifstream file_bmid(path.c_str());
        if( !file_bmid )
        {
-            cerr<< " hold out map file cannot be oppened. exiting program" <<endl;
+    	   std::cerr<< " hold out map file cannot be oppened. exiting program" <<std::endl;
             exit( -1 );
        }
 
@@ -85,36 +87,36 @@ void ErrorCalculator::changeMapFile( string path )
        }
        --nPos;
        while( oPos < marker_id.size() )
-       { 
+       {
            mapper[ oPos++ ] = nPos;
        }
       file_bmid.close();
       if( oPos != marker_id.size() )
       {
-          std::cerr<< "the new map file is missing some snps from the old snps which is invalid, match funtion may not work correctly" <<endl;
+          std::cerr<< "the new map file is missing some snps from the old snps which is invalid, match funtion may not work correctly" <<std::endl;
 
       }
      }
-     catch(exception &e)
+     catch(std::exception &e)
      {
-      cerr<<e.what()<<endl;
+    	 std::cerr<<e.what()<<std::endl;
       exit( -1 );
      }
 
 }
-void ErrorCalculator::readBsidFile(string path)
+void ErrorCalculator::readBsidFile(std::string path)
 {
    try
    {
-       ifstream file_bsid(path.c_str() );
+	   std::ifstream file_bsid(path.c_str() );
        if( !file_bsid )
        {
-            cerr<< "bsid file cannot be oppened. exiting program" <<endl;
+    	   std::cerr<< "bsid file cannot be oppened. exiting program" <<std::endl;
             exit( -1 );
        }
 
-       stringstream ss;
-       string item,line;
+       std::stringstream ss;
+       std::string item,line;
        while( getline(file_bsid , line) )
         {
                 ss.clear();ss.str(line);
@@ -127,48 +129,48 @@ void ErrorCalculator::readBsidFile(string path)
         pers_count/=2;
         file_bsid.close();
 
-        
+
   }
-  catch(exception &e)
+  catch(std::exception &e)
   {
-     cerr<<e.what()<<endl;
+	  std::cerr<<e.what()<<std::endl;
      exit( -1 );
   }
 
 
 }
-void ErrorCalculator::readPedFile(string path, string missing)
+void ErrorCalculator::readPedFile(std::string path, std::string missing)
 {
          if(pers_count<=0)
          {
-             cerr<<"read bsid file first"<<endl;
+        	 std::cerr<<"read bsid file first"<<std::endl;
              return;
          }
          ped_file.clear();
          ped_file.resize(pers_count);
-         vector < char > locator;
+         std::vector < char > locator;
          int start=0, j=0;
          bool warn = false;
          try
          {
-                ifstream file_ped(path.c_str());
+        	 std::ifstream file_ped(path.c_str());
                 if( !file_ped )
                 {
-                    cerr<< "original ped file cannot be oppened. exiting program" <<endl;
+                	std::cerr<< "original ped file cannot be oppened. exiting program" <<std::endl;
                      exit( -1 );
                 }
 
-                string item,line;
+                std::string item,line;
                 while(getline(file_ped,line))
                 {
-                        vector<string> v;
-                        string item;
-                        stringstream ss1(line);
+                	std::vector<std::string> v;
+                	std::string item;
+                	std::stringstream ss1(line);
                         while(getline(ss1,item,' '))
                         {
                                 v.push_back(item);
                         }
-             
+
                         if(start == 0)
 			{
                               for(int t = 6; ( t + 1 ) < v.size(); t+=2 )
@@ -179,7 +181,7 @@ void ErrorCalculator::readPedFile(string path, string missing)
 			}
                          for(int t = 6, i = 0; ( t + 1 ) < v.size() && i < locator.size(); t+=2, ++i )
                          {
-                                SNPs s;
+                        	 SNPs_lrf s;
                                 if( missing.compare( v[t] )==0 ||missing.compare( v[t+1] )==0 )
 				{
                                         warn = true;
@@ -193,15 +195,15 @@ void ErrorCalculator::readPedFile(string path, string missing)
                         }
                         j++;
                 }
-          
+
 	       if(warn)
                {
-                    cerr<<"warning: In ped file "<<path<< ": missing values of type: " << missing << " characters found" << endl; 
+	    	   std::cerr<<"warning: In ped file "<<path<< ": missing values of type: " << missing << " characters found" << std::endl;
                }
           }
-         catch(exception &e)
+         catch(std::exception &e)
          {
-                 cerr<<e.what()<<endl;
+        	 std::cerr<<e.what()<<std::endl;
                  exit( -1 );
          }
 }
@@ -215,45 +217,45 @@ int returnACGTcountPED(string pedFile)
 
 }
 */
-void ErrorCalculator::readHPedFile(string path, string missing)
+void ErrorCalculator::readHPedFile(std::string path, std::string missing)
 {
          if(pers_count<=0)
          {
-             cerr<<"read bsid file first"<<endl;
+        	 std::cerr<<"read bsid file first"<<std::endl;
              return;
          }
          hped_file.clear();
          hped_file.resize(pers_count);
-         vector < char > locator;
+         std::vector < char > locator;
          int start=0, j=0;
          bool warn = false;
          try
          {
-                ifstream file_ped(path.c_str());
+        	 std::ifstream file_ped(path.c_str());
                 if( !file_ped )
                 {
-                    cerr<< "hold out file cannot be oppened. exiting program" <<endl;
+                	std::cerr<< "hold out file cannot be oppened. exiting program" <<std::endl;
                     exit( -1 );
                  }
 
-                string item,line;
+                std::string item,line;
                 while(getline(file_ped,line))
                 {
-                        vector<string> v;
-                        string item;
-                        stringstream ss1(line);
+                	std::vector<std::string> v;
+                	std::string item;
+                	std::stringstream ss1(line);
                         while(getline(ss1,item,' '))
                         {
                                 v.push_back(item);
                         }
-                        vector< string >::iterator it;
+                        std::vector< std::string >::iterator it;
                        it = find( sample_id.begin(), sample_id.end(), v[0] );
 
                         if( it >= sample_id.end() )
                         {
-                             string str = "This person is missing in original " 
+                        	std::string str = "This person is missing in original "
                                  " ped file: " + v[0];
-                             log( str ); 
+                             log( str );
                              continue;
                         }
                         j = ( it - sample_id.begin() ) /2 ;
@@ -267,7 +269,7 @@ void ErrorCalculator::readHPedFile(string path, string missing)
 			}
                          for(int t = 6, i = 0; ( t + 1 ) < v.size() && i < locator.size(); t+=2, ++i )
                          {
-                                SNPs s;
+                        	 SNPs_lrf s;
                                 if( missing.compare( v[t] )==0 ||missing.compare( v[t+1] )==0 )
 				{
                                         warn = true;
@@ -281,15 +283,15 @@ void ErrorCalculator::readHPedFile(string path, string missing)
                         }
                       //  j++;
                 }
-          
+
 	       if(warn)
                {
-                    cerr<<"warning: In ped file "<<path<< ": missing values of type: " << missing << " characters found" << endl; 
+	    	   std::cerr<<"warning: In ped file "<<path<< ": missing values of type: " << missing << " characters found" << std::endl;
                }
           }
-         catch(exception &e)
+         catch(std::exception &e)
          {
-                 cerr<<e.what()<<endl;
+        	 std::cerr<<e.what()<<std::endl;
                  exit( -1 );
          }
 }
@@ -305,30 +307,30 @@ bool ErrorCalculator::isInitialCmDrop(int snp1, int snp2, float minLength){
 
 //New algorithm to start at middle, and step outwards for trim positions:
 //Nate 2/4/2014
-vector<int> ErrorCalculator::getTrimPositions(std::vector<float>averages,int snp1,int snp2,float threshold,float minLength){
-	vector<int> trimPositions;
-	int length = snp2 - snp1; 
+	std::vector<int> ErrorCalculator::getTrimPositions(std::vector<float>averages,int snp1,int snp2,float threshold,float minLength){
+	std::vector<int> trimPositions;
+	int length = snp2 - snp1;
 	int midpoint = (int)((length/2.0)+0.5);
 	int distance_from_midpoint = 30; //this value by default. Will change if SH.length < 61
 	int start = midpoint-distance_from_midpoint, end = midpoint+distance_from_midpoint;
 
 	//debug items
-	vector<int> starts;
-	vector<int> ends;
+	std::vector<int> starts;
+	std::vector<int> ends;
 	starts.push_back(start);
 	ends.push_back(end);
 
 	//perform a quick initial check on the SH. If it is below the initial SH cM length, then let it be known
 	if( ( (marker_id[snp2].cm_distance - marker_id[snp1].cm_distance) < minLength )  ){
-	
+
 		trimPositions.push_back(snp1);
 		trimPositions.push_back(snp2);
 		trimPositions.push_back(1); //same as error drop code
 		return trimPositions;
 	}
 	if(length <= 61) {
-	//In this case, we can't move +- 30 on either side, so we need to determine this size dynamically, based on the length of the SH.		
-		distance_from_midpoint = (int)( (0.28 * length) + 0.5 );		
+	//In this case, we can't move +- 30 on either side, so we need to determine this size dynamically, based on the length of the SH.
+		distance_from_midpoint = (int)( (0.28 * length) + 0.5 );
 		trimPositions.push_back(0);
 		trimPositions.push_back(length-1);
 		return trimPositions;
@@ -344,18 +346,18 @@ vector<int> ErrorCalculator::getTrimPositions(std::vector<float>averages,int snp
 	}
 	for(int i = midpoint+distance_from_midpoint; i < length; i++){ //find the end point
 		if(averages[i]>threshold){
-			end = i-1; 
+			end = i-1;
 			ends.push_back(end);
 			break;
 		}
 		end++;
 		ends.push_back(end);
 	}
-	//at this point, you have your start and end positions, so check the cM distance, if it passes, then push it. Otherwise, it will have to be 
+	//at this point, you have your start and end positions, so check the cM distance, if it passes, then push it. Otherwise, it will have to be
 	//thrown out, so push something very small to fail the SNP threshold
 	//cout << "In TRIM, the distance is : " << ((marker_id[(snp1+end)].cm_distance) - (marker_id[(snp1+start)].cm_distance)) << " and the minlength is : " << minLength << endl
 	if(start == -1) start = 0;
-	
+
 	if( ((marker_id[(snp1+end)].cm_distance) - (marker_id[(snp1+start)].cm_distance)) >= minLength ){
         	trimPositions.push_back(start);
 		trimPositions.push_back(end);
@@ -367,9 +369,9 @@ vector<int> ErrorCalculator::getTrimPositions(std::vector<float>averages,int snp
 	return trimPositions;
 }
 
-vector<int> ErrorCalculator::getTrimPositions(std::vector<float>averages,int snp1,int snp2, float threshold_start, float threshold_end,float minLength,int ma_err_ends)
+	std::vector<int> ErrorCalculator::getTrimPositions(std::vector<float>averages,int snp1,int snp2, float threshold_start, float threshold_end,float minLength,int ma_err_ends)
 {
-        vector<int> trimPositions;
+		std::vector<int> trimPositions;
         int length=snp2-snp1;
         int start=0,end=length;
         if(ma_err_ends>=length)ma_err_ends=length;
@@ -392,11 +394,11 @@ vector<int> ErrorCalculator::getTrimPositions(std::vector<float>averages,int snp
           return trimPositions;
 }
 
-//getTrueMovingAverages() is a slightly differnt version of getMovingAverages, and it is intended to be 
+//getTrueMovingAverages() is a slightly differnt version of getMovingAverages, and it is intended to be
 //used only when calculating the TrueIBD segments. The main difference comes in where it starts calculating
-vector<float>  ErrorCalculator::getTrueMovingAverages(vector<int> errors,int snp1,int snp2,int width){
-	vector<float> averages;
-	vector<int> e_Places;
+	std::vector<float>  ErrorCalculator::getTrueMovingAverages(std::vector<int> errors,int snp1,int snp2,int width){
+		std::vector<float> averages;
+		std::vector<int> e_Places;
 	int length = snp2-snp1;
 	//move in one window length on both ends
 	int start = snp1;// + (width/2);
@@ -410,7 +412,7 @@ vector<float>  ErrorCalculator::getTrueMovingAverages(vector<int> errors,int snp
 	for(int i = 0; i < errors.size(); i++){
 		e_Places[errors[i]] = 1;
 	}
-	
+
 	for(int i = 0; i<(width); i++){
 		averages[0] += e_Places[i];
 	}
@@ -428,9 +430,9 @@ vector<float>  ErrorCalculator::getTrueMovingAverages(vector<int> errors,int snp
 }
 //======================
 //------------------with new, backwards algorithm
-vector<float> ErrorCalculator::getTrueMovingAverages2(vector<int> errors,int snp1, int snp2, int width){
-	vector<float> averages;
-        vector<int> e_Places;
+	std::vector<float> ErrorCalculator::getTrueMovingAverages2(std::vector<int> errors,int snp1, int snp2, int width){
+		std::vector<float> averages;
+		std::vector<int> e_Places;
         int length = snp2-snp1;
 	int start = snp1;
 	int end = snp2;
@@ -643,14 +645,14 @@ return averages;
 //======================
 //adding reference as of 4/25..
 
-vector<float>  ErrorCalculator::getMovingAverages(vector<int> errors,int snp1,int snp2,int width, int extendSNP)//snp1,snp2=start,end;<piyush> added the param int EXTENDSNP for calculating moving window avg
+	std::vector<float>  ErrorCalculator::getMovingAverages(std::vector<int> errors,int snp1,int snp2,int width, int extendSNP)//snp1,snp2=start,end;<piyush> added the param int EXTENDSNP for calculating moving window avg
 {
 	//cout<<"getMovingAverages snp1= "<<snp1<<endl;
 	//cout<<"getMovingAverages snp2 = "<<snp2<<endl;
 	//cout<<"getMovingAverages errors size ="<<errors.size()<<endl;
-    vector<float> averages;
+	std::vector<float> averages;
       int length= snp2-snp1;
-    vector<int> e_Places;
+      std::vector<int> e_Places;
     averages.resize(length);
     e_Places.resize(length+(width/2));
       e_Places[(e_Places.size()-1)]=1;//this is injecting an error at the last possible position. We may ignore this from now on.
@@ -694,7 +696,7 @@ for(int i = 1; i < midpoint; i++){
 //backwards
 int backwardPresent = lastPos - (width/2);
 if(backwardPresent <= 0){
-	cerr << backwardPresent << endl;
+	std::cerr << backwardPresent << std::endl;
 }
 int backwardPrevious = lastPos;
 int avLast = averages.size() - 2;
@@ -731,9 +733,9 @@ for(int i = avLast; i >= midpoint; i--){
     return averages;
 }
 
-vector<int>ErrorCalculator::getFinalErrors(vector<vector< int> > errors)const
+std::vector<int>ErrorCalculator::getFinalErrors(std::vector<std::vector< int> > errors)const
 {
-        vector<int>finalPositions;
+		std::vector<int>finalPositions;
         int p1=0,p2=0,p3=0,p4=0;
         int len1=0;
         int maxlen=0,prev=0,present=0;
@@ -743,7 +745,7 @@ vector<int>ErrorCalculator::getFinalErrors(vector<vector< int> > errors)const
         }
         int first_pos=getMax(errors[0][p1],errors[1][p2],errors[2][p3],errors[3][p4]); //get the max distance of the first set, this is the longest match and hence is an...error?
 
-        finalPositions.push_back(first_pos); //here we push back an actual error position. Things may be as simple as always setting finalPositions[0] = 0, just to ensure that there is always an 
+        finalPositions.push_back(first_pos); //here we push back an actual error position. Things may be as simple as always setting finalPositions[0] = 0, just to ensure that there is always an
 					    //error at position 0 in the SH. Similarily, we could add an error to the end of the SH by setting finalPositions[finalPositions.size()-1] = SH.size() as well
    while(p1<errors[0].size()||p2<errors[1].size()||p3<errors[2].size()||p4<errors[3].size())
    {
@@ -824,24 +826,24 @@ vector<int>ErrorCalculator::getFinalErrors(vector<vector< int> > errors)const
 
   return finalPositions;
 }
-vector<vector<int> >  ErrorCalculator::checkErrors(int pers1,int pers2,int snp1,int snp2)const
+std::vector<std::vector<int> >  ErrorCalculator::checkErrors(int pers1,int pers2,int snp1,int snp2)const
 {
-        vector<vector<int > > errors;
-        vector<int> finalErrors;
+	std::vector<std::vector<int > > errors;
+	std::vector<int> finalErrors;
         errors.resize(4);
 
         if(pers1>=ped_file.size()||pers2>=ped_file.size())
         {
 
-                cerr<<"error occured here pers1 as "<<pers1<<" pers2 as "<<pers2<<endl;
+        	std::cerr<<"error occured here pers1 as "<<pers1<<" pers2 as "<<pers2<<std::endl;
                 exit(-1);
 
         }
 
         else if(snp1>=ped_file[pers1].size()||snp2>=ped_file[pers1].size())
         {
-                cerr<< "snp1 = " << snp1 << " snp2 = "<< snp2<<endl;
-                cerr<<"something went wrong with bmid file or ped file"<<endl;
+        	std::cerr<< "snp1 = " << snp1 << " snp2 = "<< snp2<<std::endl;
+        	std::cerr<<"something went wrong with bmid file or ped file"<<std::endl;
                 exit(-1);
         }
 
@@ -890,23 +892,23 @@ float ErrorCalculator::getOppHomThreshold( int pers1, int pers2, int snp1Old, in
   }
   if( snp1Old >= mapper.size() || snp2Old >= mapper.size()  )
   {
-        cerr<< " In hold out phase wrong snps entered: " 
-            << snp1Old << " or " <<snp2Old <<endl;
+	  std::cerr<< " In hold out phase wrong snps entered: "
+            << snp1Old << " or " <<snp2Old <<std::endl;
         exit( -1 );
   }
   int snp1 = mapper[ snp1Old ];
   int snp2 = mapper[ snp2Old ];
   if(pers1>=hped_file.size()||pers2>=hped_file.size())
   {
-     cerr<<"error occured here pers1 as "<<pers1<<" pers2 as "<<pers2<<endl;
+	  std::cerr<<"error occured here pers1 as "<<pers1<<" pers2 as "<<pers2<<std::endl;
      exit(-1);
   }
-  else if(snp1>=hped_file[pers1].size()||snp2>=hped_file[pers1].size() 
+  else if(snp1>=hped_file[pers1].size()||snp2>=hped_file[pers1].size()
 
             || snp1>=hped_file[pers2].size()||snp2>=hped_file[pers2].size() )
   {
-     cerr<<"something went wrong with bmid file or hped file"<< snp1
-      << " " << snp2 << " "<< hped_file[pers1].size()  <<endl;
+	  std::cerr<<"something went wrong with bmid file or hped file"<< snp1
+      << " " << snp2 << " "<< hped_file[pers1].size()  <<std::endl;
      exit(-1);
   }
   float OHCount = 0;
@@ -916,7 +918,7 @@ float ErrorCalculator::getOppHomThreshold( int pers1, int pers2, int snp1Old, in
      {
         ++OHCount;
      }
-  }	
+  }
   return OHCount;
 }
 int ErrorCalculator::getMax(int &a,int &b, int &c, int &d)const
@@ -936,74 +938,74 @@ void ErrorCalculator::finalOutPut(int pers1,int pers2,int snp1,int snp2, float m
 
         if((marker_id[snp2].cm_distance-marker_id[snp1].cm_distance)<min_cm)
         {
-                return; 
+                return;
         }
  
-        if(sample_id.size()<=pers1*2||sample_id.size()<=pers2*2) 
+        if(sample_id.size()<=pers1*2||sample_id.size()<=pers2*2)
         {
-               cerr<<"There is an error with the ped and bsid files, please check that they are correct."<<endl;
+        	std::cerr<<"There is an error with the ped and bsid files, please check that they are correct."<<std::endl;
                return;
 
         }
-	
+
              if(snp1>=marker_id.size()||snp2>=marker_id.size())
              {
-                     cerr<<"something went wrong with the bmid file while outputing. The snp1 is: "<<snp1<<" snp2 is "<<snp2<<" marker id size is "<<marker_id.size()<<endl;
+            	 std::cerr<<"something went wrong with the bmid file while outputing. The snp1 is: "<<snp1<<" snp2 is "<<snp2<<" marker id size is "<<marker_id.size()<<std::endl;
                      return;
 
              }
              //Addressing the use of IID instead of FID by stepping up one index in the master sample_id vector. This has been tested, and will be
              //applied to all outputs. It goes from sample_id[pers1*2] --> sample_id[(pers1*2)+1]
-                cout<<sample_id[(pers1*2)+1]<<"\t"
+             std::cout<<sample_id[(pers1*2)+1]<<"\t"
              <<sample_id[(pers2*2)+1]<<"\t"
              <<marker_id[snp1].bp_distance<<"\t"
              <<marker_id[snp2].bp_distance<<"\t"
                <<(snp2-snp1)<<"\t"
-               <<(marker_id[snp2].cm_distance-marker_id[snp1].cm_distance)<<endl;
-        
+               <<(marker_id[snp2].cm_distance-marker_id[snp1].cm_distance)<<std::endl;
+
 
 }
 
 void ErrorCalculator::finalErrorsOutput(int pers1, int pers2, int snp1, int snp2, float min_cm, float per_err){
-  if(sample_id.size()<=pers1*2||sample_id.size()<=pers2*2) 
+  if(sample_id.size()<=pers1*2||sample_id.size()<=pers2*2)
   {
-    cerr<<"some thing went wrong with bsid file while outputing"<<endl;
+	  std::cerr<<"some thing went wrong with bsid file while outputing"<<std::endl;
     return;
   }
 
   if(snp1>=marker_id.size()||snp2>=marker_id.size())
   {
-    cerr<<"some thing went wrong with bmid file while outputing. The snp1 is: "<<snp1<<" snp2 is "<<snp2<<" marker id size is "<<marker_id.size()<<endl;
+	  std::cerr<<"some thing went wrong with bmid file while outputing. The snp1 is: "<<snp1<<" snp2 is "<<snp2<<" marker id size is "<<marker_id.size()<<std::endl;
     return;
   }
-  cout<<sample_id[(pers1*2)+1]<<"\t"
+  std::cout<<sample_id[(pers1*2)+1]<<"\t"
   <<sample_id[(pers2*2)+1]<<"\t"
   <<marker_id[snp1].bp_distance<<"\t"
   <<marker_id[snp2].bp_distance<<"\t"
   <<(snp2-snp1)<<"\t"
   <<(marker_id[snp2].cm_distance-marker_id[snp1].cm_distance)<<"\t"
-  << per_err << endl;
+  << per_err << std::endl;
 }
 
 void ErrorCalculator::weightedOutput(int pers1, int pers2, int snp1, int snp2, float weight){
-  cout<<sample_id[(pers1*2)+1]<<"\t"
+	std::cout<<sample_id[(pers1*2)+1]<<"\t"
   <<sample_id[(pers2*2)+1]<<"\t"
   <<marker_id[snp1].bp_distance<<"\t"
   <<marker_id[snp2].bp_distance<<"\t"
   <<(snp2-snp1)<<"\t"
   <<(marker_id[snp2].cm_distance-marker_id[snp1].cm_distance)
-  <<"\t"<<weight<<endl;
+  <<"\t"<<weight<<std::endl;
 }
 
-template <class T>
-void ErrorCalculator::fullPlusDroppedOutput( int pers1,int pers2,int snp1,int snp2,int min_snp, float min_cm, vector<T> positions,float pct_err,int reason ){
+/*template <class T>
+void ErrorCalculator::fullPlusDroppedOutput( int pers1,int pers2,int snp1,int snp2,int min_snp, float min_cm, std::vector<T> positions,float pct_err,int reason ){
         if(sample_id.size()<=pers1*2||sample_id.size()<=pers2*2)
         {
-               cerr<<"some thing went wrong with bsid file while outputing"<<endl;
+        	std::cerr<<"some thing went wrong with bsid file while outputing"<<std::endl;
                return;
         }
 
-   cout<<sample_id[(pers1*2)+1]<<"\t"
+        std::cout<<sample_id[(pers1*2)+1]<<"\t"
              <<sample_id[(pers2*2)+1]<<"\t"
     <<marker_id[snp1].bp_distance<<"\t"
              <<marker_id[snp2].bp_distance<<"\t"
@@ -1011,43 +1013,43 @@ void ErrorCalculator::fullPlusDroppedOutput( int pers1,int pers2,int snp1,int sn
                <<(marker_id[snp2].cm_distance-marker_id[snp1].cm_distance)<<"\t"<<"/";
         for(int i=0;i<positions.size();++i)
         {
-          cout<<positions[i]<<"/";
+        	std::cout<<positions[i]<<"/";
         }
-        cout<<"\t"<< pct_err;
-        cout << "\t"<< reason << endl;
+        std::cout<<"\t"<< pct_err;
+        std::cout << "\t"<< reason << std::endl;
 }
 //new error1 output
 template <class T>
-void ErrorCalculator::middleOutPut(int pers1, int pers2, int snp1, int snp2, int min_snp, float min_cm, vector<T> positions, float pct_err, int start, int end){
+void ErrorCalculator::middleOutPut(int pers1, int pers2, int snp1, int snp2, int min_snp, float min_cm, std::vector<T> positions, float pct_err, int start, int end){
 	if( (snp1==-1) || (snp2==-1) ) return;
 	if( (sample_id.size() <= (pers1*2)) || (sample_id.size() <= (pers2*2)) ){
-		cerr << "Something went wrong with the bsid file while outputting data." << endl;
+		std::cerr << "Something went wrong with the bsid file while outputting data." << std::endl;
 		return;
 	}
-	cout << sample_id[(pers1*2)+1] << "\t" << sample_id[(pers2*2)+1] << "\t" << marker_id[snp1].bp_distance << "\t" << marker_id[snp2].bp_distance << "\t"
+	std::cout << sample_id[(pers1*2)+1] << "\t" << sample_id[(pers2*2)+1] << "\t" << marker_id[snp1].bp_distance << "\t" << marker_id[snp2].bp_distance << "\t"
 	     << start << "/" << end << "\t" << (snp2-snp1) << "\t" << (marker_id[snp2].cm_distance - marker_id[snp1].cm_distance) << "\t" << "/";
 	for(int i = 0; i < positions.size(); i++){
-		cout << positions[i] << "/";
+		std::cout << positions[i] << "/";
 	}
-	cout << "\t" << pct_err << endl;
+	std::cout << "\t" << pct_err << std::endl;
 }
 //error1 output
 template <class T>
-void ErrorCalculator::middleOutPut( int pers1,int pers2,int snp1,int snp2, int min_snp, float min_cm,vector<T> positions, float pct_err )
+void ErrorCalculator::middleOutPut( int pers1,int pers2,int snp1,int snp2, int min_snp, float min_cm,std::vector<T> positions, float pct_err )
 {
         if(snp1==-1) return;
         if(snp2==-1)
         {
            return;
         }
-   
+
         if(sample_id.size()<=pers1*2||sample_id.size()<=pers2*2)
         {
-               cerr<<"some thing went wrong with bsid file while outputing"<<endl;
+        	std::cerr<<"some thing went wrong with bsid file while outputing"<<std::endl;
                return;
         }
 
-	 cout<<sample_id[(pers1*2)+1]<<"\t"
+        std::cout<<sample_id[(pers1*2)+1]<<"\t"
              <<sample_id[(pers2*2)+1]<<"\t"
 		<<marker_id[snp1].bp_distance<<"\t"
              <<marker_id[snp2].bp_distance<<"\t"
@@ -1055,13 +1057,13 @@ void ErrorCalculator::middleOutPut( int pers1,int pers2,int snp1,int snp2, int m
                <<(marker_id[snp2].cm_distance-marker_id[snp1].cm_distance)<<"\t"<<"/";
         for(int i=0;i<positions.size();++i)
         {
-        	cout<<positions[i]<<"/";     
+        	std::cout<<positions[i]<<"/";
         }
-        cout<<"\t"<< pct_err <<endl;
+        std::cout<<"\t"<< pct_err <<std::endl;
 
 }
 template < class T >
-void ErrorCalculator::middleOutPut( int pers1,int pers2,int snp1,int snp2,int min_snp, float min_cm, vector<T> positions,float pct_err,string reason){
+void ErrorCalculator::middleOutPut( int pers1,int pers2,int snp1,int snp2,int min_snp, float min_cm, std::vector<T> positions,float pct_err,std::string reason){
         if(snp1==-1) return;
         if(snp2==-1)
         {
@@ -1071,14 +1073,14 @@ void ErrorCalculator::middleOutPut( int pers1,int pers2,int snp1,int snp2,int mi
         {
              return;
         }
-   
+
         if(sample_id.size()<=pers1*2||sample_id.size()<=pers2*2)
         {
-               cerr<<"some thing went wrong with bsid file while outputing"<<endl;
+        	std::cerr<<"some thing went wrong with bsid file while outputing"<<std::endl;
                return;
         }
 
-   cout<<sample_id[(pers1*2)+1]<<"\t"
+        std::cout<<sample_id[(pers1*2)+1]<<"\t"
              <<sample_id[(pers2*2)+1]<<"\t"
     <<marker_id[snp1].bp_distance<<"\t"
              <<marker_id[snp2].bp_distance<<"\t"
@@ -1086,18 +1088,18 @@ void ErrorCalculator::middleOutPut( int pers1,int pers2,int snp1,int snp2,int mi
                <<(marker_id[snp2].cm_distance-marker_id[snp1].cm_distance)<<"\t"<<"/";
         for(int i=0;i<positions.size();++i)
         {
-          cout<<positions[i]<<"/";     
+        	std::cout<<positions[i]<<"/";
         }
-        cout<<"\t"<< pct_err;
-        cout << "\t"<< reason << endl;
+        std::cout<<"\t"<< pct_err;
+        std::cout << "\t"<< reason << std::endl;
 }
 
 
 template < class T >
 void ErrorCalculator::middleOutPut( int pers1,int pers2,
-                                  int snp1,int snp2, int min_snp, 
-                                  float min_cm,vector< T > positions, 
-                                  vector< int > trims, float pct_err )
+                                  int snp1,int snp2, int min_snp,
+                                  float min_cm,std::vector< T > positions,
+                                  std::vector< int > trims, float pct_err )
 {
         if(snp1==-1) return;
         if(snp2==-1)
@@ -1106,17 +1108,17 @@ void ErrorCalculator::middleOutPut( int pers1,int pers2,
         }
         if((marker_id[snp2].cm_distance - marker_id[snp1].cm_distance)<min_cm || (snp2-snp1) < min_snp )
         {
-	     cout << "Testing a theory. " << endl;
+        	std::cout << "Testing a theory. " << std::endl;
              return;
         }
 
         if(sample_id.size()<=pers1*2||sample_id.size()<=pers2*2)
         {
-               cerr<<"some thing went wrong with bsid file while outputing"<<endl;
+        	std::cerr<<"some thing went wrong with bsid file while outputing"<<std::endl;
                return;
         }
 
-         cout<<sample_id[(pers1*2)+1]<<"\t"
+        std::cout<<sample_id[(pers1*2)+1]<<"\t"
              <<sample_id[(pers2*2)+1]<<"\t"
                 <<marker_id[snp1].bp_distance<<"\t"
              <<marker_id[snp2].bp_distance<<"\t"
@@ -1124,22 +1126,22 @@ void ErrorCalculator::middleOutPut( int pers1,int pers2,
                <<(marker_id[snp2].cm_distance-marker_id[snp1].cm_distance)<<"\t"<<"/";
         for(int i=0;i<trims.size();++i)
         {
-                cout<<trims[i]<<"/";
+        	std::cout<<trims[i]<<"/";
         }
-        cout<<"\t";
+        std::cout<<"\t";
         for(int i=0;i<positions.size();++i)
         {
-                cout<<positions[i]<<"/";
+        	std::cout<<positions[i]<<"/";
         }
-        cout<<"\t"<< pct_err <<endl;
+        std::cout<<"\t"<< pct_err <<std::endl;
 
 }
 //this one is for ma1, the one above is I think for ma2
 template < class T >
 void ErrorCalculator::middleOutPut( int pers1,int pers2,
                                   int snp1,int snp2, int min_snp,
-                                  float min_cm,vector< T > positions,
-                                  vector< int > trims, float pct_err,int start,int end )
+                                  float min_cm,std::vector< T > positions,
+                                  std::vector< int > trims, float pct_err,int start,int end )
 {
         if(snp1==-1) return;
         if(snp2==-1)
@@ -1148,11 +1150,11 @@ void ErrorCalculator::middleOutPut( int pers1,int pers2,
         }
         if(sample_id.size()<=pers1*2||sample_id.size()<=pers2*2)
         {
-               cerr<<"some thing went wrong with bsid file while outputing"<<endl;
+        	std::cerr<<"some thing went wrong with bsid file while outputing"<<std::endl;
                return;
         }
 
-         cout<<sample_id[(pers1*2)+1]<<"\t"
+        std::cout<<sample_id[(pers1*2)+1]<<"\t"
              <<sample_id[(pers2*2)+1]<<"\t"
                 <<marker_id[snp1].bp_distance<<"\t"
              <<marker_id[snp2].bp_distance<<"\t"
@@ -1161,15 +1163,15 @@ void ErrorCalculator::middleOutPut( int pers1,int pers2,
 	       << pct_err << "\t" << start <<"/" << end << "/";
         for(int i=0;i<trims.size();++i)
         {
-                cout<<trims[i]<<"/";
+        	std::cout<<trims[i]<<"/";
         }
-        cout<<"\t";
+        std::cout<<"\t";
         for(int i=0;i<positions.size();++i)
         {
-                cout<<positions[i]<<"/";
+        	std::cout<<positions[i]<<"/";
         }
 
-}
+}*/
 //==================================================
 //---------------------------------
 //This will be used for the error output option.
@@ -1179,7 +1181,7 @@ void ErrorCalculator::middleOutPut( int pers1,int pers2,
 //min_snp is the minimum length in snp for a sh to be dropped(possibly depricated
 //min_cm is the minimum length in centiMorgans for a sh to be dropped(possibly depricated)
 //positions is a vector of the moving averages at each point
-//errors is a vector of where each IE is located. 
+//errors is a vector of where each IE is located.
 //pct_err is PIE value for this sh
 //start/end Trim is the snp where the SH starts/stops AFTER trimming
 //start/end is the snp where the SH starts/stops BEFORE trimming
@@ -1188,35 +1190,35 @@ void ErrorCalculator::middleOutPut( int pers1,int pers2,
 //1 => dropped due to length before trimming
 //2 => dropped due to length after trimming
 //3 => dropped due to PIE
-template < class T > void ErrorCalculator::errorOutput(int pers1, int pers2, int snp1, int snp2, int min_snp, float min_cm, std::vector< T > positions,std::vector< int > errors, float pct_err, int startTrim,int endTrim, int start, int end, int reason)
+/*template < class T > void ErrorCalculator::errorOutput(int pers1, int pers2, int snp1, int snp2, int min_snp, float min_cm, std::vector< T > positions,std::vector< int > errors, float pct_err, int startTrim,int endTrim, int start, int end, int reason)
 {
 	if( (snp1 == -1) || (snp2 == -1) ) return;
 	if(sample_id.size()<=pers1*2||sample_id.size()<=pers2*2)
         {
-               cerr<<"something went wrong with bsid file while outputing"<<endl;
+		std::cerr<<"something went wrong with bsid file while outputing"<<std::endl;
                return;
         }
-	cout << sample_id[(pers1*2)+1] << "\t" << sample_id[(pers2*2)+1] << "\t" << marker_id[snp1].bp_distance << "\t" << marker_id[snp2].bp_distance << "\t"
-             << (snp2-snp1) << "\t" << (marker_id[snp2].cm_distance-marker_id[snp1].cm_distance) << "\t" << pct_err << "\t" << start << "/" << end << "\t" << startTrim <<"/" << endTrim << "\t" << reason 
+	std::cout << sample_id[(pers1*2)+1] << "\t" << sample_id[(pers2*2)+1] << "\t" << marker_id[snp1].bp_distance << "\t" << marker_id[snp2].bp_distance << "\t"
+             << (snp2-snp1) << "\t" << (marker_id[snp2].cm_distance-marker_id[snp1].cm_distance) << "\t" << pct_err << "\t" << start << "/" << end << "\t" << startTrim <<"/" << endTrim << "\t" << reason
 	     << "\t" << "/";
 	for(int i=0;i<errors.size();++i)
         {
-                cout << errors[i] << "/";
+		std::cout << errors[i] << "/";
         }
-        cout << "\t";
+	std::cout << "\t";
         for(int i=0;i<positions.size();++i)
         {
-                cout << positions[i] << "/";
+        	std::cout << positions[i] << "/";
         }
-	cout << endl;
+        std::cout << std::endl;
 }
 //-----------------------------------------
 //==================================================
 template < class T >
-void ErrorCalculator::middleHoldOutPut( int pers1, 
-                                    int pers2, int snp1, int snp2, 
+void ErrorCalculator::middleHoldOutPut( int pers1,
+                                    int pers2, int snp1, int snp2,
                                     int min_snp, float min_cm,
-                                    vector< T > positions, vector< int > trims, 
+                                    std::vector< T > positions, std::vector< int > trims,
                                     float pct_err, int numberofOppHoms,
                                     int length )
 {
@@ -1232,11 +1234,11 @@ void ErrorCalculator::middleHoldOutPut( int pers1,
 
         if(sample_id.size()<=pers1*2||sample_id.size()<=pers2*2)
         {
-               cerr<<"some thing went wrong with bsid file while outputing"<<endl;
+        	std::cerr<<"some thing went wrong with bsid file while outputing"<<std::endl;
                return;
         }
 
-         cout<<sample_id[(pers1*2)+1]<<"\t"
+        std::cout<<sample_id[(pers1*2)+1]<<"\t"
              <<sample_id[(pers2*2)+1]<<"\t"
                 <<marker_id[snp1].bp_distance<<"\t"
              <<marker_id[snp2].bp_distance<<"\t"
@@ -1244,16 +1246,16 @@ void ErrorCalculator::middleHoldOutPut( int pers1,
                <<(marker_id[snp2].cm_distance-marker_id[snp1].cm_distance)<<"\t"<<"/";
         for(int i=0;i<trims.size();++i)
         {
-                cout<<trims[i]<<"/";
+        	std::cout<<trims[i]<<"/";
         }
-        cout<<"\t";
+        std::cout<<"\t";
         for(int i=0;i<positions.size();++i)
         {
-                cout<<positions[i]<<"/";
+        	std::cout<<positions[i]<<"/";
         }
-        cout<<"\t"<< pct_err << "\t"<< numberofOppHoms << "\t" << length <<endl;
+        std::cout<<"\t"<< pct_err << "\t"<< numberofOppHoms << "\t" << length <<std::endl;
 
-}
+}*/
 /***********************************************************************************
  *Input: a vector<int> of finalErrors(error positions, indexed from 1), start and end snps snp1 and snp2. ma_err_ends is no longer used
  *Output: A float returning the PIE threshold for this SH
@@ -1262,14 +1264,14 @@ void ErrorCalculator::middleHoldOutPut( int pers1,
   care is taken to adjust the finalErrors vector values by 1, so that they index correctly. This indexing difference is simply a result of things have been handled in this
   system historically, so just roll with it.
  ***********************************************************************************/
-float ErrorCalculator::getThreshold(vector<int> finalErrors,int snp1,int snp2, int ma_err_ends)
+float ErrorCalculator::getThreshold(std::vector<int> finalErrors,int snp1,int snp2, int ma_err_ends)
 {
            int length = snp2-snp1;
   	   float sum=0;
            for(int i=0;i<finalErrors.size();i++)
            {
 		finalErrors[i] = finalErrors[i] - 1; //this is to adjust to array indexing
-		if( (finalErrors[i] > snp1) && (finalErrors[i] < (snp2))) 
+		if( (finalErrors[i] > snp1) && (finalErrors[i] < (snp2)))
                 {
                      ++sum;
                 }
@@ -1282,7 +1284,7 @@ float ErrorCalculator::getThreshold(vector<int> finalErrors,int snp1,int snp2, i
  *Output: a float returning the PIE threshold for this SH
  *Description: Same as the above version of getThreshold, except for the fact that trulyIBD segments are not yet trimmed when this function is called
  *******************************************************************************/
-float ErrorCalculator::getThreshold(vector<int> finalErrors, int snp1, int snp2){
+float ErrorCalculator::getThreshold(std::vector<int> finalErrors, int snp1, int snp2){
 	float sum = 0.0;
 	int length = snp2 - snp1;
 	for(int i = 0; i < finalErrors.size(); i++){
@@ -1297,7 +1299,7 @@ float ErrorCalculator::getCMDistance(int position)
 {
       if(position>=marker_id.size())
              {
-                       cerr<<"wrong cm distance reuqested"<<endl;
+    	  std::cerr<<"wrong cm distance reuqested"<<std::endl;
                        exit( -1 );
              }
        return marker_id[position].cm_distance;
@@ -1330,5 +1332,5 @@ float ErrorCalculator::getXthPercentile(float x){
 	index = index - 1; //array indexing
 	//just to be safe, make sure that this index is still in range
 	assert((index >= 0) && (index < max_averages.size()));
-	return max_averages[index];				
+	return max_averages[index];
 }

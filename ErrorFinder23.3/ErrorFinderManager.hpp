@@ -1,6 +1,8 @@
 #ifndef ERRORFINDERMANAGER_H
 #define ERRORFINDERMANAGER_H
-#include "Consolidator.cpp"
+//#include "Consolidator.cpp"
+#include "Consolidator.hpp"
+#include "ErrorCalculator.hpp"
 #include <iostream>
 #include <string>
 
