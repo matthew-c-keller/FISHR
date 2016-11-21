@@ -1,5 +1,9 @@
 # FISHR
-#This is the Old version of FISHR. THe new version is called FISHR2 located at https://github.com/matthew-c-keller/FISHR2.git
+#This is the Old version of FISHR. The new version is called FISHR2 located at 
+
+- https://github.com/matthew-c-keller/FISHR2.git
+
+
 
 FISHR2 includes significant changes from this verion of FISHR.
 
