@@ -1,9 +1,7 @@
 # FISHR
-#This is the Old version of FISHR. The new version is called FISHR2 located at 
+# This is the old version of FISHR. The new version is called FISHR2 located at 
 
 - https://github.com/matthew-c-keller/FISHR2.git
-
-
 
 FISHR2 includes significant changes and improvements from this verion of FISHR, including: 
 
@@ -17,9 +15,9 @@ FISHR2 includes significant changes and improvements from this verion of FISHR, 
 
 
 
-# Below is the intial README file for the FISHR program, which detects IBD segments between individuals. 
+# Below is the intial README file for the FISHR program
 
-Note 
+FISHR detects IBD segments between individuals using genomewide SNP data.  
 - FISHR needs the bmid, bsid, bmatch file from the GERMLINE2 to be able to run. 
 - The wrapper program calls either one of FISHR or FISHR_Low_Ram. So you need to compile  FISHR and FISHR_Low_Ram seperately(below).
 
