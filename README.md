@@ -17,7 +17,7 @@ FISHR2 includes significant changes and improvements from this verion of FISHR, 
 
 
 
-Below is the intial README file for the FISHR program, which detects IBD segments between individuals. 
+# Below is the intial README file for the FISHR program, which detects IBD segments between individuals. 
 
 Note 
 - FISHR needs the bmid, bsid, bmatch file from the GERMLINE2 to be able to run. 
