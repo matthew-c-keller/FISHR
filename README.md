@@ -5,14 +5,22 @@
 
 
 
-FISHR2 includes significant changes from this verion of FISHR.
+FISHR2 includes significant changes and improvements from this verion of FISHR, including: 
+
+1) Can be used directly on SHAPEIT formatted (HAPS/SAMPLE) data in addition to the "phased PED" file format used by GERMLINE and FISHR v.1. 
+
+2) Running FISHR2 is now a single-step process. The user runs FISHR2 directly on the phased data rather than running GERMLINE2 first on the phased data and then FISHR on the GERMLINE output.
+
+3) IBD2 and IBD4  shared segments (where 2 or 4 IBD segments exist at the same location between two individuals) can now be detected by FISHR2.
+
+4) use "./FISHR2 -help" command to view the list of flags and their usuage. 
 
 
 
-This is the intial README file for the FISHR program, which detects IBD segments between individuals. 
+Below is the intial README file for the FISHR program, which detects IBD segments between individuals. 
 
 Note 
-- FISHR needs the bmid, bsid, bmatch file from the germline to be able to run. 
+- FISHR needs the bmid, bsid, bmatch file from the GERMLINE2 to be able to run. 
 - The wrapper program calls either one of FISHR or FISHR_Low_Ram. So you need to compile  FISHR and FISHR_Low_Ram seperately(below).
 
 To Compile FISHR: Navigate to ErrorFinder23.3 folder. Let the binary file be in the ErrorFinder23.3 folder (same folder).
